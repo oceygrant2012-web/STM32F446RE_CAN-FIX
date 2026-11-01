@@ -62,64 +62,139 @@ typedef struct
 
 } CAN_FIX_RxHeaderTypeDef;
 
-//Create the Hardware Mask.
-//Standard CAN ID is 11-bits
-void CAN_FIX_HandleCanRxMessage(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-void CAN_FIX_Initialize(uint32_t canId);
-void CAN_FIX_PeriodicCheck(void);
-//TODO:  This will need to have correct parameters
+struct CAN_FIX_Comms
+{
+	uint16_t StdId;
+	uint8_t Count;
+	char Description[50];
+	char DataType[7];
+	uint8_t Precision;
+	float LowLimit;
+	float HighLimit;
+	char UnitOfMeasure[10];
+};
 
-//Send the type of data to CAN
-void CAN_FIX_SendHighPriortyNodeAlarm(uint16_t alarm, uint8_t* alarmData, uint8_t alarmDataLength);
-//void CAN_FIX_SendNodeSpecificMessage();
-//void CAN_FIX_SendTwoWayCommunication(uint8_t channel, int8_t sender, uint8_t* data);
+
+//High Priority Pilot Control Inputs
+#define HighPriorityFlapControlSwitchCanId_0 0x100
+#define HighPriorityTrimControlSwitchCanId_0 0x102
+#define HighPriorityElectricalControlSwitchCanId_0 0x104
+#define HighPriorityLightingControlSwitchCanId_0 0x106
+#define HighPriorityFuelPumpControlSwitchCanId_0 0x108
+#define HighPriorityFuelValveControlSwitchCanId_0 0x10A
+#define HighPriorityAutoPilotControlSwitchCanId_0 0x10C
+#define HighPriorityVHFControlSwitchCanId_0 0x10E
+#define HighPriorityTransponderControlSwitchCanId_0 0x110
+#define HighPriorityStarterMagsControlSwitchCanId_0 0x112
+#define HighPriorityLandingGearControlSwitchCanId_0 0x114
+#define HighPriorityKeypadKeyControlCanId_0 0x116
+#define HighPriorityGenericControlSwitchCanId_0 0x118
+
+// These are set by CAN_FIX_SendHighPriorityControlPositionInt
+//High Priority Measured Positions
+#define HighPriorityPitchControlCanId 0x11A
+#define HighPriorityRollControlCanId 0x11B
+#define HighPriorityYawControlCanId 0x11C
+#define HighPriorityCollectiveControlCanId 0x11D
+#define HighPriorityAntiTorqueControlCanId 0x11E
+#define HighPriorityFlapControlCanId 0x11F
+
+//High Priority Controls
+#define HighPriorityLeftBrakeControlCanId 0x120
+#define HighPriorityRightBrakeControlCanId 0x121
+#define HighPriorityEngineThrottleControlCanId_0 0x122
+#define HighPriorityEnginePropControlCanId_0 0x126
+#define HighPriorityEngineMixtureControlCanId_0 0x12A
+
+//High Priority Measurements
+#define HighPriorityElevatorMeasurementCanId 0x140
+#define HighPriorityAileronMeasurementCanId 0x141
+#define HighPriorityRudderMeasurementCanId 0x142
+#define HighPriorityCollectiveMeasurementCanId 0x143
+#define HighPriorityTailRotorMeasurementCanId 0x144
+#define HighPriorityFlapMeasurementCanId 0x145
+#define HighPriorityLandingGearPositionSwCanId 0x146
+
+#define HighPriorityPitchAngleMeasurementCanId 0x180
+#define HighPriorityRollAngleMeasurementCanId 0x181
+#define HighPriorityAngleOfAttackMeasurementCanId 0x182
+#define HighPriorityIndicatedAirspeedMeasurementCanId 0x183
+#define HighPriorityIndicatedAltitudeMeasurementCanId 0x184
+#define HighPriorityHeadingMeasurementCanId 0x185
+#define HighPriorityVsiMeasurementCanId 0x186
+#define HighPriorityVariometerVerticalSpeedMeasurementCanId 0x187
+#define HighPriorityRadarAltitudeMeasurementCanId 0x188
+#define HighPriorityYawMeasurementCanId 0x189
+#define HighPriorityNormalAccelerationMeasurementCanId 0x18A
+#define HighPriorityLateralAccelerationMeasurementCanId 0x18B
+#define HighPriorityLongitudinalAccelerationMeasurementCanId 0x18C
+#define HighPriorityTrueAirspeedMeasurementCanId 0x18D
+#define HighPriorityCalibratedAirspeedMeasurementCanId 0x18E
+#define HighPriorityMachAirspeedMeasurementCanId 0x18F
+#define HighPriorityAltemeterSettingCanId 0x190
+#define HighPriorityPressureAltitudeMeasurementCanId 0x191
+
+#define HighPriorityILSDeviationCanId 0x1C0
+#define HighPriorityGlideslopeDeviationCanId 0x1C1
+#define HighPriorityPositionLatitudeCanId 0x1C2
+#define HighPriorityPositionLongitudeCanId 0x1C3
+#define HighPriorityGroundSpeedCanId 0x1C4
+#define HighPriorityTrueGroundTrackCanId 0x1C5
+#define HighPriorityMagneticGroundTrackCanId 0x1C6
+
+#define HighPriorityGroundTrackErrorCanId 0x1C7
+#define HighPrioritySelectedCourseCanId 0x1C8
+#define HighPrioritySelectedVORRadialCanId 0x1C9
+#define HighPrioritySelectedGlidePathAngleCanId 0x1CA
+#define HighPrioritySelectedVerticalSpeedCanId 0x1CB
+#define HighPrioritySelectedAltitudeCanId 0x1CC
+#define HighPriorityRAIMStatusCanId 0x1CD
+#define HighPriorityRAIMHorizontalErrorCanId 0x1CE
+#define HighPriorityRAIMVerticalErrorCanId 0x1CF
+#define HighPriorityADSBAirbornePositionLatitudeCanId 0x1D0
+#define HighPriorityADSBAirbornePositionLongitudeCanId 0x1D1
+#define HighPriorityADSBAirbornePositionAltitudeCanId 0x1D2
+#define HighPriorityADSBSurfacePositionLatitudeCanId 0x1D3
+#define HighPriorityADSBSurfacePositionLongitudeCanId 0x1D4
+#define HighPriorityADSBSurfacePositionAltitudeCanId 0x1D5
+#define HighPriorityADSBStatusCanId 0x1D6
+#define HighPriorityADSBIdentificationCanId 0x1D7
+#define HighPriorityADSBTypeCanId 0x1D8
+#define HighPriorityADSBAirborneVelocityCanId 0x1D9
+#define HighPriorityADSBAirborneBearingCanId 0x1DA
+#define HighPriorityADSBAirborneRateOfClimbCanId 0x1DB
+#define HighPriorityADSBEmergencyPriorityCanId 0x1DC
+#define HighPriorityADSBCurrentTrajectoryChangePointCanId 0x1DD
+#define HighPriorityADSBNextTrajectoryChangePointCanId 0x1DE
+#define HighPriorityADSBOperationCoordMessageCanId 0x1DF
+#define HighPriorityADSBOperationalStatusCanId 0x1E0
+
+#define HighPriorityEngineRPMCanId_0 0x200
+#define HighPriorityPropRPMCanId_0 0x204
+#define HighPriorityTorqueCanId_0 0x208
+#define HighPriorityTurbineInletTempCanId_0 0x20C
+#define HighPriorityTurbineInterTempCanId_0 0x210
+#define HighPriorityTurbineOutletTempCanId_0 0x214
+#define HighPriorityFuelPressureSwitchCanId_0 0x218
+#define HighPriorityOilPressureSwitchCanId_0 0x21C
+#define HighPriorityOilTemperatureSwitchCanId_0 0x220
+#define HighPriorityCoolantTemperatureSwitchCanId_0 0x224
+#define HighPriorityFuelQuantitySwitchCanId_0 0x228
+#define HighPriorityOilQuantitySwitchCanId_0 0x22C
+#define HighPriorityCoolantQuantitySwitchCanId_0 0x230
+
+//Base CanID for SendEngineSensorReading
+#define HighPriorityFuelFlowCanId_0 0x234
+//Final value for SendEngineSensorReading
+#define HighPriorityMainBatCharge_3 0x267
+
+#define HighPriorityCabinPressureCanId 0x280
+#define HighPriorityCabinAltitudeCanId 0x281
+#define NormalPrioritySpeedBrakeControlCanId 0x300
+#define NormalPrioritySpeedBrakePositionCanId 0x380
+#define NormalPriorityLightStatusCanId 0x38A
 
 
-//Handle Incoming data.  Override the function that is neccessary for the specific need
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityNodeAlarm(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityPilotControlInput(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityMeasuredPosition(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityFlightData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityNavigationData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityEngineAircraftData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleHighPriorityAuxiliaryData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNormalPriorityPilotControlInput(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNormalPriorityMeasuredPosition(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNormalPriorityFlightData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNormalPriorityNavigationData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNormalPriorityEngineAircraftData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNormalPriorityAuxiliaryData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleTwoWayConnectionChannelData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
-
-/* Define the default function with __weak attribute */
-void CAN_FIX_HandleNodeSpecificMessage(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
 
 typedef enum
 {
@@ -140,7 +215,27 @@ typedef enum
 #define CanFix_Switch_6 0x40
 #define CanFix_Switch_7 0x80
 
+typedef enum
+{
+	EngineRpm,
+	PropRpm,
+} RpmTypedef;
 
+typedef enum
+{
+	InletTemp,
+	InterTemp,
+	OutletTemp,
+} TurbineTempTypedef;
+
+typedef enum{
+	Min = 0b0001,
+	Max = 0b0010,
+	LowWarn = 0b0100,
+	LowAlarm = 0b0101,
+	HighWarn = 0b0110,
+	HIghAlarm = 0b0111,
+}RpmMetadataTypedef;
 
 typedef enum {
 	Angle_Min = 1,
@@ -243,6 +338,66 @@ typedef enum{
 	ControlSurfaceMeasurement_Collective,
 	ControlSurfaceMeasurement_TailRotor
 }ControlSurfaceMeasurementsTypedef;
+
+typedef enum
+{
+	SpeedBrakeControl,
+	CowlFlapsControl,
+	PitchTrimControl,
+	RollTrimControl,
+	YawTrimControl,
+	PilotControlMaxValue
+
+} PilotControlInputTypedef;
+
+//
+
+
+typedef enum
+{
+	SpeedBrakePosition,
+	CowlFlapsPosition,
+	PitchTrimPosition,
+	RollTrimPosition,
+	YawTrimPosition,
+	PitchTrimMotorSpeed,
+	RollTrimMotorSpeed,
+	YawTrimMotorSpeed,
+	CollectiveTrimMotorSpeed,
+	AntiTorqueTrimMotorSpeed,
+	MesuredPositionsMaxValue
+
+} NormalPositionMeasurementsTypedef;
+
+typedef enum
+{
+	LightStatus,
+	FuelPumpStatus,
+	FuelValveStatus,
+	NormalStatusMaxValue
+} NormalStatusTypedef;
+
+typedef enum
+{
+	FuelFlow,
+	FuelPressure, //4
+	ManifoldPressure, //8
+	OilPressure, //12
+	OilTemp, //16
+	CoolantTemp, //20
+	FuelQuanity, //24
+	FuelPumpPressure, //28
+	OilQuantity, //32
+	CoolantQuantity, //36
+	ElectPropMotorCurrent, //40
+	MainPropBusCurrent, //44
+	MainBatCurrent, //48
+	MainBatTemp, //52
+	MainBatCharge, //56
+	SystemSensorMaxValue //60
+
+} SystemSensorTypedef;
+
 
 #define LandingGear_NoseUpFlag 0x0001
 #define LandingGear_NoseDownFlag 0x0002
@@ -365,4 +520,72 @@ void CAN_FIX_SendCalibratedAirspeed(float airspeed, uint8_t index, AttitudeAngle
 void CAN_FIX_SendMachAirspeed(float airspeed, uint8_t index, AttitudeAngleTypedef metaData );
 void CAN_FIX_SendAltimeterSetting(float alt, uint8_t index, AttitudeAngleTypedef metaData );
 void CAN_FIX_SendPressureAltitude(float presAlt, uint8_t index, AttitudeAngleTypedef metaData );
+
+
+///////////////////////// CanFix Core //////////////////////////////////////////////////////
+//Initialize CAN-Fix and set up the CAN hardware
+void CAN_FIX_Initialize(uint32_t canId);
+//If interrupts do not work for the platform, a periodic check can check if anything
+//is in the receive buffer
+void CAN_FIX_PeriodicCheck(void);
+
+const struct CAN_FIX_Comms* FindCanFixComms(uint16_t canId);
+
+//Standard CAN ID is 11-bits
+void CAN_FIX_HandleCanRxMessage(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+void CAN_FIX_SendNodeAlarm(uint16_t alarm, uint8_t* alarmData, uint8_t alarmDataLength);
+void CAN_FIX_SendDataMessage(uint16_t canId, uint8_t index, uint8_t functionCode, uint8_t* messageData, uint8_t dataLength);
+
+///////////////////////// CanFix Send //////////////////////////////////////////////////////
+
+void CAN_FIX_SendNodeAlarm(uint16_t alarm, uint8_t* alarmData, uint8_t alarmDataLength);
+void CAN_FIX_SendFloatMeasurement(const struct CAN_FIX_Comms* comms, uint16_t canId, uint8_t index, uint8_t functionCode, float floatData);
+
+///////////////////////// CanFix Receive //////////////////////////////////////////////////////
+
+//Handle Incoming data.  Override the function that is neccessary for the specific need
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityNodeAlarm(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityPilotControlInput(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityMeasuredPosition(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityFlightData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityNavigationData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityEngineAircraftData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleHighPriorityAuxiliaryData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNormalPriorityPilotControlInput(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNormalPriorityMeasuredPosition(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNormalPriorityFlightData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNormalPriorityNavigationData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNormalPriorityEngineAircraftData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNormalPriorityAuxiliaryData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleTwoWayConnectionChannelData(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
+
+/* Define the default function with __weak attribute */
+void CAN_FIX_HandleNodeSpecificMessage(CAN_FIX_RxHeaderTypeDef* rxHeader, uint8_t* rxData);
 #endif /* APPLICATION_USER_CORE_CANFIX_H_ */

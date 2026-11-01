@@ -70,7 +70,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		TxData[0] = 244;
 		TxData[1] = 10;
 		//alarmTriggered = 1;
-		CAN_FIX_SendHighPriortyNodeAlarm(1,TxData, 2);
+		CAN_FIX_SendNodeAlarm(1,TxData, 2);
 	}
 }
 
